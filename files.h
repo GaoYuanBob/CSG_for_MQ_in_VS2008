@@ -19,5 +19,5 @@ struct FileVertex : public MinimalVertexData {};
 struct FileTriangle : public MinimalTriangleData {};
 typedef RawMesh<FileVertex, FileTriangle> FileMesh;
 
-void CSG_Union(MeshModel* m1, MeshModel* m2, MeshDocument* md, const int& which_jaw);
-void CSG_Union_Teeth_and_Att_matrix(MeshModel* m1, MeshModel* m2, vcg::Matrix44f move_matrix, MeshModel* res, const int& which_jaw);
+void CSG_Union(const MeshModel& m1, const MeshModel& m2, MeshDocument* md, const int& which_jaw);
+void CSG_Union_Teeth_and_Att_matrix(const MeshModel& m1, const MeshModel& m2, vcg::Matrix44f move_matrix, MeshModel* res, const int& which_jaw);

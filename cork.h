@@ -1,4 +1,3 @@
-
 #pragma once
 
 #ifndef uint
@@ -24,10 +23,10 @@ void freeCorkTriMesh(CorkTriMesh *mesh);
 // for triangle facing.  If the triangles are presented in clockwise orientation, the object is interpreted as its unbounded complement
 
 // This function will test whether or not a mesh is solid
-bool isSolid(CorkTriMesh mesh);
+bool isSolid(const CorkTriMesh& mesh);
 
 // Boolean operations follow
-void computeUnion(CorkTriMesh in0, CorkTriMesh in1, CorkTriMesh *out);			// result = A U B
+void computeUnion(const CorkTriMesh& in0, const CorkTriMesh& in1, CorkTriMesh *out);			// result = A U B
 
 void computeDifference(CorkTriMesh in0, CorkTriMesh in1, CorkTriMesh *out);		// result = A - B
 
@@ -35,8 +34,7 @@ void computeIntersection(CorkTriMesh in0, CorkTriMesh in1, CorkTriMesh *out);	//
 
 void computeSymmetricDifference(CorkTriMesh in0, CorkTriMesh in1, CorkTriMesh *out);	// result = A XOR B
 
-																						// Not a Boolean operation, but related:
-																						//  No portion of either surface is deleted.  However, the curve of intersection between the two surfaces is made explicit,
-																						//  such that the two surfaces are now connected.
+// Not a Boolean operation, but related:
+// No portion of either surface is deleted.  However, the curve of intersection between the two surfaces is made explicit,
+// such that the two surfaces are now connected.
 void resolveIntersections(CorkTriMesh in0, CorkTriMesh in1, CorkTriMesh *out);
-

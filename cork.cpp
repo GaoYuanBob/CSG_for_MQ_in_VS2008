@@ -1,4 +1,3 @@
-
 #include "cork.h"
 #include "mesh.h"
 
@@ -71,7 +70,7 @@ struct CorkTriangle : public MinimalTriangleData, public BoolTriangleData
 typedef RawMesh<CorkVertex, CorkTriangle>   RawCorkMesh;
 typedef Mesh_CSG<CorkVertex, CorkTriangle>      CorkMesh;
 
-void corkTriMesh2CorkMesh(CorkTriMesh in, CorkMesh *mesh_out)
+void corkTriMesh2CorkMesh(const CorkTriMesh& in, CorkMesh *mesh_out)
 {
 	RawCorkMesh raw;
 	raw.vertices.resize(in.n_vertices);
@@ -129,7 +128,7 @@ void corkMesh2CorkTriMesh(CorkMesh *mesh_in, CorkTriMesh *out)
 	}
 }
 
-bool isSolid(CorkTriMesh cmesh)
+bool isSolid(const CorkTriMesh& cmesh)
 {
 	CorkMesh mesh;
 	corkTriMesh2CorkMesh(cmesh, &mesh);
@@ -148,7 +147,8 @@ bool isSolid(CorkTriMesh cmesh)
 	return solid;
 }
 
-void computeUnion(CorkTriMesh in0, CorkTriMesh in1, CorkTriMesh *out)
+// Ô­À´ÊÇ(CorkTriMesh in0, CorkTriMesh in1, CorkTriMesh *out) - GY
+void computeUnion(const CorkTriMesh& in0, const CorkTriMesh& in1, CorkTriMesh *out)
 {
 	CorkMesh cmIn0, cmIn1;
 	corkTriMesh2CorkMesh(in0, &cmIn0);
@@ -203,4 +203,3 @@ void resolveIntersections(CorkTriMesh in0, CorkTriMesh in1, CorkTriMesh *out)
 
 	corkMesh2CorkTriMesh(&cmIn0, out);
 }
-
