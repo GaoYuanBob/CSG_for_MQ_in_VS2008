@@ -11,22 +11,22 @@ typedef unsigned int uint;
 #endif
 
 // new version - 2018.11.28 修改 GY (合并原来的 readMeshModel 和 file2corktrimesh)
-void MeshModel_to_CorkTriMesh(MeshModel* mm, CorkTriMesh *out)
+void MeshModel_to_CorkTriMesh(const MeshModel& mm, CorkTriMesh *out)
 {
-	out->n_vertices  = mm->cm.vert.size();
-	out->n_triangles = mm->cm.face.size();
+	out->n_vertices  = mm.cm.vert.size();
+	out->n_triangles = mm.cm.face.size();
 	out->triangles = new uint[out->n_triangles * 3];
 	out->vertices = new float[out->n_vertices  * 3];
-	for(CMeshO::FaceIterator fi = mm->cm.face.begin(); fi != mm->cm.face.end(); ++fi)
+	for(CMeshO::ConstFaceIterator fi = mm.cm.face.begin(); fi != mm.cm.face.end(); ++fi)
 	{
-		int i = fi - mm->cm.face.begin();
-		out->triangles[3 * i]     = (int)(fi->V(0) - &*mm->cm.vert.begin());
-		out->triangles[3 * i + 1] = (int)(fi->V(1) - &*mm->cm.vert.begin());
-		out->triangles[3 * i + 2] = (int)(fi->V(2) - &*mm->cm.vert.begin());
+		int i = fi - mm.cm.face.begin();
+		out->triangles[3 * i]     = (int)(fi->V(0) - &*mm.cm.vert.begin());
+		out->triangles[3 * i + 1] = (int)(fi->V(1) - &*mm.cm.vert.begin());
+		out->triangles[3 * i + 2] = (int)(fi->V(2) - &*mm.cm.vert.begin());
 	}
-	for(CMeshO::VertexIterator vi = mm->cm.vert.begin(); vi != mm->cm.vert.end(); ++vi)
+	for(CMeshO::ConstVertexIterator vi = mm.cm.vert.begin(); vi != mm.cm.vert.end(); ++vi)
 	{
-		int i = vi - mm->cm.vert.begin();
+		int i = vi - mm.cm.vert.begin();
 		out->vertices[3 * i]     = vi->P().X();
 		out->vertices[3 * i + 1] = vi->P().Y();
 		out->vertices[3 * i + 2] = vi->P().Z();
@@ -34,22 +34,22 @@ void MeshModel_to_CorkTriMesh(MeshModel* mm, CorkTriMesh *out)
 }
 
 // new version - 2018.11.28 GY 比上边的不需要变换矩阵的就多了一个变换矩阵和坐标相乘
-void MeshModel_to_CorkTriMesh_withMoveMat(MeshModel* mm, CorkTriMesh *out, const vcg::Matrix44f& move_matrix)
+void MeshModel_to_CorkTriMesh_withMoveMat(const MeshModel& mm, CorkTriMesh *out, const vcg::Matrix44f& move_matrix)
 {
-	out->n_vertices  = mm->cm.vert.size();
-	out->n_triangles = mm->cm.face.size();
+	out->n_vertices  = mm.cm.vert.size();
+	out->n_triangles = mm.cm.face.size();
 	out->triangles = new uint[out->n_triangles * 3];
 	out->vertices = new float[out->n_vertices  * 3];
-	for(CMeshO::FaceIterator fi = mm->cm.face.begin(); fi != mm->cm.face.end(); ++fi)
+	for(CMeshO::ConstFaceIterator fi = mm.cm.face.begin(); fi != mm.cm.face.end(); ++fi)
 	{
-		int i = fi - mm->cm.face.begin();
-		out->triangles[3 * i]     = (int)(fi->V(0) - &*mm->cm.vert.begin());
-		out->triangles[3 * i + 1] = (int)(fi->V(1) - &*mm->cm.vert.begin());
-		out->triangles[3 * i + 2] = (int)(fi->V(2) - &*mm->cm.vert.begin());
+		int i = fi - mm.cm.face.begin();
+		out->triangles[3 * i]     = (int)(fi->V(0) - &*mm.cm.vert.begin());
+		out->triangles[3 * i + 1] = (int)(fi->V(1) - &*mm.cm.vert.begin());
+		out->triangles[3 * i + 2] = (int)(fi->V(2) - &*mm.cm.vert.begin());
 	}
-	for(CMeshO::VertexIterator vi = mm->cm.vert.begin(); vi != mm->cm.vert.end(); ++vi)
+	for(CMeshO::ConstVertexIterator vi = mm.cm.vert.begin(); vi != mm.cm.vert.end(); ++vi)
 	{
-		int i = vi - mm->cm.vert.begin();
+		int i = vi - mm.cm.vert.begin();
 		Point3f tmpP =  move_matrix * vi->P();
 		out->vertices[3 * i]     = tmpP.X();
 		out->vertices[3 * i + 1] = tmpP.Y();
@@ -58,7 +58,7 @@ void MeshModel_to_CorkTriMesh_withMoveMat(MeshModel* mm, CorkTriMesh *out, const
 }
 
 // GY 融合两个模型，目前用来融合（所有牙齿）和（附件与倒凹），所以不需要变换矩阵
-void CSG_Union(MeshModel* m1, MeshModel* m2, MeshDocument* md, const int& which_jaw)
+void CSG_Union(const MeshModel& m1, const MeshModel& m2, MeshDocument* md, const int& which_jaw)
 {
 	CorkTriMesh *ctm1 = new CorkTriMesh(), *ctm2 = new CorkTriMesh(), *ctm_res = new CorkTriMesh();
 	MeshModel_to_CorkTriMesh(m1, ctm1);			// 直接转了，不需要转成 FileMesh 过渡
@@ -162,7 +162,7 @@ void CSG_Union(MeshModel* m1, MeshModel* m2, MeshDocument* md, const int& which_
 
 // 融合 单颗牙齿m1 和 对应的附件m2，最后保存在m1中(目前认为一颗牙齿最多只有一个附件)
 // 因为牙齿和附件实际坐标是没有变的，只是变换矩阵变，所以需要传入变换矩阵
-void CSG_Union_Teeth_and_Att_matrix(MeshModel* m1, MeshModel* m2, vcg::Matrix44f move_matrix, MeshModel* res, const int& which_jaw)
+void CSG_Union_Teeth_and_Att_matrix(const MeshModel& m1, const MeshModel& m2, vcg::Matrix44f move_matrix, MeshModel* res, const int& which_jaw)
 {
 	CorkTriMesh *ctm1 = new CorkTriMesh(), *ctm2 = new CorkTriMesh(), *ctm_res = new CorkTriMesh();	// 不写这个new，生成的是临时变量？
 
